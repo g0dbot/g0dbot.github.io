@@ -1,0 +1,61 @@
+{
+  "name": "3FX Mixer",
+  "shortName": "3FX",
+  "version": "1.0.0",
+  "manifestVersion": 3,
+  "tagline": "Studio-Grade Web Audio DSP & Mixer for Google Chrome",
+  "description": "Professional-grade audio mixer for browser tabs with real-time effects, 8-band dynamic EQ, vintage tape saturation, studio compressor, reverb, texturizer, and spatializer.",
+  "links": {
+    "extensionPage": "https://chromewebstore.google.com/detail/3fx-audio-suite/placeholder-id",
+    "chromeWebStore": "https://chromewebstore.google.com/detail/3fx-audio-suite/placeholder-id",
+    "edgeAddons": "https://microsoftedge.microsoft.com/addons/detail/placeholder-id",
+    "github": "https://github.com/3fx-audio/3fx-suite",
+    "website": "https://3fx.app",
+    "docs": "https://3fx.app/docs",
+    "issues": "https://github.com/3fx-audio/3fx-suite/issues"
+  },
+  "dspModules": [
+    {
+      "id": "eq",
+      "name": "8-Band Dynamic EQ",
+      "description": "Parametric equalizer with peak, shelf, and notch filters and interactive canvas visualization."
+    },
+    {
+      "id": "tape",
+      "name": "Vintage Tape Machine",
+      "description": "Analog tape saturation, warmth, wow/flutter, and tape speed controls."
+    },
+    {
+      "id": "compressor",
+      "name": "Studio Compressor",
+      "description": "Downwards and upwards compression with knee curve, sidechain filter, and gain reduction meter."
+    },
+    {
+      "id": "reverb",
+      "name": "Stereo & Slowed Reverb",
+      "description": "High-fidelity impulse response convolution and algorithmic decay engine."
+    },
+    {
+      "id": "texturizer",
+      "name": "Texturizer & Bitcrusher",
+      "description": "Sample rate decimation, bit reduction, and vinyl/cassette ambient background generator."
+    },
+    {
+      "id": "spatializer",
+      "name": "Stereo Imager & Spatializer",
+      "description": "Haas effect stereo widener, mid-side processing, and 3D binaural positioning."
+    },
+    {
+      "id": "bassboost",
+      "name": "Sub-Bass Enhancer",
+      "description": "Tuned harmonic bass generator and sub-octave synthesizer."
+    },
+    {
+      "id": "limiter",
+      "name": "True Peak Limiter",
+      "description": "Transparent brickwall lookahead peak limiter to eliminate digital clipping."
+    }
+  ],
+  "author": "3FX Audio Labs",
+  "license": "MIT"
+}

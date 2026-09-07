@@ -1,0 +1,20 @@
+{
+  "name": "3fx-site",
+  "version": "1.0.0",
+  "description": "Official showcase website for 3FX — Studio-Grade Web Audio DSP & Mixer for Google Chrome",
+  "private": true,
+  "scripts": {
+    "start": "npx serve . -p 3000",
+    "preview": "npx serve . -p 3000"
+  },
+  "keywords": [
+    "3fx",
+    "web-audio",
+    "dsp",
+    "chrome-extension",
+    "audio-mixer",
+    "parametric-eq"
+  ],
+  "author": "3FX Audio Labs",
+  "license": "MIT"
+}

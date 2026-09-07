@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3FX — Pro Studio Audio Suite for Google Chrome</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
+  <meta name="description" content="3FX is a high-performance, multi-channel Web Audio DSP mastering suite for Google Chrome with parametric EQ, tape saturation, compression, reverb, and per-tab mixing.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07090e;
+      --card-bg: rgba(14, 18, 28, 0.85);
+      --border: rgba(0, 243, 255, 0.2);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --primary: #00f3ff;
+      --primary-glow: rgba(0, 243, 255, 0.4);
+      --secondary: #b033ff;
+      --accent-green: #00ffaa;
+      --text: #f0f4fc;
+      --text-dim: #b0c0d8;
+      --muted: #62728d;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 20px 40px;
+      overflow-x: hidden;
+      position: relative;
+    }
+    .grid-bg {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .glow-orb {
+      position: absolute;
+      width: 650px;
+      height: 650px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(176, 51, 255, 0.12) 0%, rgba(0, 243, 255, 0.09) 40%, transparent 70%);
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+      animation: pulse 9s ease-in-out infinite alternate;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.9) translate(-30px, -20px); }
+      100% { transform: scale(1.1) translate(30px, 20px); }
+    }
+
+    /* Top Navigation */
+    .top-nav {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 1200px;
+      padding: 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      margin-bottom: 40px;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .nav-brand img {
+      width: 32px;
+      height: 32px;
+      filter: drop-shadow(0 2px 8px var(--primary-glow));
+    }
+    .nav-brand span.name {
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: -0.3px;
+    }
+    .nav-brand span.accent {
+      color: var(--primary);
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .nav-link {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-link:hover {
+      color: var(--primary);
+    }
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: rgba(0, 243, 255, 0.1);
+      border: 1px solid var(--border);
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover {
+      background: var(--primary);
+      color: #040711;
+      box-shadow: 0 0 16px var(--primary-glow);
+    }
+
+    /* Main Container */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+    }
+
+    /* Hero Split Layout */
+    .hero-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+    @media (min-width: 960px) {
+      .hero-layout {
+        grid-template-columns: 1.05fr 1.35fr;
+        gap: 50px;
+      }
+    }
+
+    .hero-copy {
+      text-align: left;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 100px;
+      background: rgba(0, 243, 255, 0.08);
+      border: 1px solid rgba(0, 243, 255, 0.25);
+      color: var(--primary);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      font-family: var(--font-mono);
+    }
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 8px var(--primary);
+      animation: blink 2s infinite ease-in-out;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    h1 {
+      font-size: 2.8rem;
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -1px;
+      margin-bottom: 18px;
+      background: linear-gradient(135deg, #ffffff 40%, var(--primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    @media (max-width: 640px) {
+      h1 { font-size: 2.1rem; }
+    }
+    p.lead {
+      color: var(--text-dim);
+      font-size: 1.05rem;
+      line-height: 1.65;
+      margin-bottom: 28px;
+    }
+    .actions-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      margin-bottom: 30px;
+    }
+    @media (min-width: 480px) {
+      .actions-group {
+        flex-direction: row;
+      }
+    }
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 15px 26px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #00f3ff, #0084ff);
+      color: #030814;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 20px rgba(0, 243, 255, 0.35);
+      border: none;
+      cursor: pointer;
+    }
+    .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 243, 255, 0.55);
+      background: linear-gradient(135deg, #33f6ff, #00a2ff);
+    }
+    .cta-btn svg {
+      transition: transform 0.2s ease;
+    }
+    .cta-btn:hover svg {
+      transform: translateX(3px);
+    }
+    .cta-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 15px 22px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+    }
+    .cta-secondary:hover {
+      background: rgba(0, 243, 255, 0.12);
+      border-color: var(--primary);
+      color: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0, 243, 255, 0.25);
+    }
+
+    /* Features 2x2 Grid */
+    .features-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      text-align: left;
+    }
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: #b0c0d8;
+      font-family: var(--font-mono);
+    }
+    .feature-item svg {
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    /* ─── Hero App Image Showcase Chassis ─── */
+    .app-showcase-card {
+      position: relative;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(0, 243, 255, 0.18);
+      transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .app-showcase-card:hover {
+      transform: translateY(-4px) scale(1.01);
+      border-color: rgba(0, 243, 255, 0.45);
+      box-shadow: 0 35px 80px rgba(0, 0, 0, 0.9), 0 0 60px rgba(0, 243, 255, 0.3);
+    }
+
+    /* Window Chrome Topbar */
+    .window-header {
+      background: #090c14;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .window-dots {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .window-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ff5f56; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #27c93f; }
+
+    .window-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #9cb0cc;
+      letter-spacing: 0.5px;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 100px;
+      background: rgba(0, 255, 170, 0.12);
+      border: 1px solid rgba(0, 255, 170, 0.3);
+      color: var(--accent-green);
+      font-size: 0.68rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+    .status-pulse {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 6px var(--accent-green);
+      animation: blink 1.6s infinite ease-in-out;
+    }
+
+    /* Main App Image Frame */
+    .app-image-wrap {
+      position: relative;
+      width: 100%;
+      background: #04060b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .app-image-wrap img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+    .app-showcase-card:hover .app-image-wrap img {
+      transform: scale(1.015);
+    }
+
+    .image-overlay-bar {
+      position: absolute;
+      bottom: 0;
+      inset-inline: 0;
+      background: linear-gradient(0deg, rgba(7, 9, 14, 0.95) 0%, rgba(7, 9, 14, 0.6) 65%, transparent 100%);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(6px);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .overlay-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .overlay-tag {
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(0, 243, 255, 0.25);
+      color: #d8e5f8;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      font-weight: 500;
+    }
+    .launch-link-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .launch-link-pill:hover {
+      text-decoration: underline;
+    }
+
+    /* Bottom Specs Strip */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 10px;
+    }
+    .spec-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: left;
+      transition: all 0.2s ease;
+    }
+    .spec-card:hover {
+      border-color: var(--border);
+      transform: translateY(-2px);
+    }
+    .spec-card h3 {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .spec-card h3 svg {
+      color: var(--primary);
+    }
+    .spec-card p {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    footer {
+      margin-top: 50px;
+      font-size: 0.8rem;
+      color: #55627a;
+      text-align: center;
+      width: 100%;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 24px;
+      position: relative;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+  <div class="glow-orb"></div>
+
+  <!-- Top Navigation -->
+  <header class="top-nav">
+    <a href="./3fx/" class="nav-brand">
+      <img src="./assets/icon-128.png" onerror="this.src='./3fx/assets/icon-128.png'" alt="3FX Logo">
+      <span class="name">3<span class="accent">FX</span> Mixer</span>
+    </a>
+    <div class="nav-actions">
+      <a href="./3fx/" class="nav-link">Interactive Console</a>
+      <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="nav-link" data-extension-link="github">GitHub</a>
+      <a href="https://chromewebstore.google.com" target="_blank" rel="noopener noreferrer" class="nav-btn" data-extension-link="chromeWebStore">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+          <circle cx="12" cy="12" r="4" fill="currentColor"/>
+        </svg>
+        <span>Add to Chrome</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Hero Split Layout -->
+    <div class="hero-layout">
+      <!-- Left: Headline & Actions -->
+      <div class="hero-copy">
+        <div class="pill">
+          <span class="dot"></span> Manifest V3 &bull; Web AudioWorklet DSP <span data-extension-version style="opacity:0.8; margin-left:4px;"></span>
+        </div>
+
+        <h1 data-extension-name>Studio DSP Mastering for Google Chrome</h1>
+        <p class="lead" data-extension-desc>
+          Transform any browser tab into an elite recording studio. High-precision 8-band dynamic EQ, vintage tape saturation, studio compression, convolution reverb, and per-tab multi-channel mixing with 0ms perceived latency.
+        </p>
+
+        <div class="actions-group">
+          <a href="./3fx/" class="cta-btn">
+            <span>Launch Interactive Showcase</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+          <a href="https://chromewebstore.google.com" target="_blank" rel="noopener noreferrer" class="cta-secondary" data-extension-link="chromeWebStore">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <circle cx="12" cy="12" r="4"></circle>
+              <line x1="21.17" y1="8" x2="12" y2="8"></line>
+              <line x1="3.95" y1="6.06" x2="8.54" y2="14"></line>
+              <line x1="10.88" y1="21.94" x2="15.46" y2="14"></line>
+            </svg>
+            <span>Add to Chrome</span>
+          </a>
+        </div>
+
+        <div class="features-list">
+          <div class="feature-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>8-Band Dynamic EQ</span>
+          </div>
+          <div class="feature-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Vintage Tape Machine</span>
+          </div>
+          <div class="feature-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Mastering Compressor</span>
+          </div>
+          <div class="feature-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Per-Tab Multi-Channel Mix</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Main Image of the App We Built -->
+      <div class="app-showcase-card">
+        <div class="window-header">
+          <div class="window-dots">
+            <div class="window-dot dot-red"></div>
+            <div class="window-dot dot-yellow"></div>
+            <div class="window-dot dot-green"></div>
+          </div>
+          <div class="window-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <span>3FX AUDIO SUITE &mdash; EXTENSION</span>
+          </div>
+          <div class="status-badge">
+            <span class="status-pulse"></span>
+            <span>LIVE DSP</span>
+          </div>
+        </div>
+
+        <a href="./3fx/" class="app-image-wrap" title="Click to launch interactive 3FX showcase">
+          <img 
+            src="./assets/app-preview.jpg" 
+            onerror="this.src='./3fx/assets/app-preview.jpg'" 
+            alt="3FX Chrome Extension Interface — 8-Band Dynamic EQ, Real-Time Spectrum, Multi-Channel Faders & Hardware DSP Rack"
+          >
+          <div class="image-overlay-bar">
+            <div class="overlay-tags">
+              <span class="overlay-tag">8-Band Dynamic EQ</span>
+              <span class="overlay-tag">Multi-Channel Faders</span>
+              <span class="overlay-tag">Hardware Arcs</span>
+            </div>
+            <span class="launch-link-pill">
+              <span>Interactive Live Demo &rarr;</span>
+            </span>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Features Overview Cards -->
+    <div class="specs-grid">
+      <div class="spec-card">
+        <h3>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Parametric Dynamic EQ
+        </h3>
+        <p>Surgical 8-band dynamic biquad filtering with interactive curve drag handles, Q-factor resonance, and FFT spectrum visualizer.</p>
+      </div>
+
+      <div class="spec-card">
+        <h3>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Vintage Tape Saturation
+        </h3>
+        <p>Warm analog harmonic distortion, magnetic tape compression, wow and flutter micro-pitch modulation, and bias controls.</p>
+      </div>
+
+      <div class="spec-card">
+        <h3>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+          Multi-Channel Tab Mixer
+        </h3>
+        <p>Independent volume faders, stereo pan, mute, solo, and mono checks for individual Chrome audio tabs and master bus.</p>
+      </div>
+
+      <div class="spec-card">
+        <h3>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Theme Builder Engine
+        </h3>
+        <p>Full customization across Cyber DSP, Dark Studio Purple, Emerald Matrix, Cyber Gold, and Daylight themes with dynamic scale tokens.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2026 3FX Suite &bull; Built with Web AudioWorklet & Svelte &bull; 100% Client-Side Private DSP
+  </footer>
+
+  <script>
+    // Dynamically bind links from extension.json
+    (function loadExtensionConfig() {
+      const paths = ['./extension.json', './3fx/extension.json'];
+      function tryLoad(idx) {
+        if (idx >= paths.length) return;
+        fetch(paths[idx])
+          .then(res => res.ok ? res.json() : null)
+          .then(data => {
+            if (!data) return tryLoad(idx + 1);
+            const links = data.links || {};
+            document.querySelectorAll('[data-extension-link]').forEach(el => {
+              const key = el.getAttribute('data-extension-link');
+              const targetUrl = links[key] || links.extensionPage || links.chromeWebStore || data.chromeWebStoreUrl;
+              if (targetUrl) el.setAttribute('href', targetUrl);
+            });
+            const vEl = document.querySelector('[data-extension-version]');
+            if (vEl && data.version) vEl.textContent = 'v' + data.version;
+          })
+          .catch(() => tryLoad(idx + 1));
+      }
+      tryLoad(0);
+    })();
+  </script>
+</body>
+</html>
